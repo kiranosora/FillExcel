@@ -13,14 +13,16 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.dict2Obj)
 
     def dict2Obj(self, jsonDict ):
+        print("jsonDict:%s  type: %s"%(jsonDict, type(jsonDict)))
         if '__class__' in jsonDict:
             class_name = jsonDict.pop('__class__')
             module_name = jsonDict.pop('__module__')
+            module_ = __import__(module_name)
             print("class_name:%s module_name:%s"%(class_name, module_name))
-            #class_ = getattr(module_name, class_name)
-            class_ = globals()[class_name]
-            args = dict((str(key.encode('ascii')), value) for key, value in jsonDict.items())
-            instance = class_(**args)
+            class_ = getattr(module_, class_name)
+            instance = class_()
+            for key, value in jsonDict.items():
+                instance.__dict__[key] = value
         else:
             instance = jsonDict
         return instance
@@ -49,4 +51,5 @@ class DataTable:
 if __name__ == '__main__':
     dt = DataTable('AA','BB', 'CC')
     jsonStr=json.dumps(dt, cls=MyJsonEncoder)
-    MyJsonDecoder().decode(jsonStr)
+    obj=MyJsonDecoder().decode(jsonStr)
+    print("obj %s type %s"%(obj, type(obj)))
