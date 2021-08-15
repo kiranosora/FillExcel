@@ -30,7 +30,8 @@ def read_excel():
         rowValues.append(sheet.row_values(i))
     return rowValues
 
-def export2MySql(values):
+
+def connectDB:
     #Connect to database
     mydb = pymysql.connect(
             host='localhost',
@@ -38,18 +39,22 @@ def export2MySql(values):
             password='X-1oastrike',
             )
     mycursor = mydb.cursor()
-    try:
-        mycursor.execute("CREATE DATABASE testDB")
-    except :
-        print("Error")
-    try:
-        mycursor.execute("USE testDB")
-    except :
-        print("Error")
-    try:
-        mycursor.execute("CREATE TABLE testTable(ID INT NOT NULL AUTO_INCREMENT, name VARCHAR(100) NOT NULL, score INT NOT NULL, PRIMARY KEY (ID) ) ENGINE=InnoDB DEFAULT CHARSET=utf8;")
-    except:
-        print("Error")
+    return mycursor
+
+def export2MySql(mycursor, values, appendMode=False):
+    if not appendMode:
+        try:
+            mycursor.execute("CREATE DATABASE testDB")
+        except :
+            print("Error")
+        try:
+            mycursor.execute("USE testDB")
+        except :
+            print("Error")
+        try:
+            mycursor.execute("CREATE TABLE testTable(ID INT NOT NULL AUTO_INCREMENT, name VARCHAR(100) NOT NULL, score INT NOT NULL, PRIMARY KEY (ID) ) ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+        except:
+            print("Error")
     mycursor.execute("INSERT INTO testTable (name, score) values (%s, %s)", values)
     print(mycursor)
     mycursor.close
@@ -60,6 +65,8 @@ def export2MySql(values):
 if __name__ == '__main__':
     write_excel()
     rowVaues=read_excel()
+    mycursor = connectDB()
+    appendMode = False
     for i in range(1, len(rowVaues)):
         values = rowVaues[i][1:] 
-        export2MySql(values)
+        export2MySql(mycursor, values, appendMode)
